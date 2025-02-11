@@ -47,6 +47,7 @@ def load_meta_gsheet_data():
     try:
         # Open the Google Sheet
         spreadsheet_id = "1GwN8pFB9Gkjuq9MJnHX6LxaFUakE9WXF6MKRy23xPQc"  # Replace with your actual ID
+        st.write(spreadsheet_id)
         spreadsheet = gs_client.open_by_key(spreadsheet_id)
 
         # Select the first worksheet (or specify by name)
