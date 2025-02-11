@@ -49,6 +49,8 @@ def load_meta_gsheet_data():
         spreadsheet_id = "1GwN8pFB9Gkjuq9MJnHX6LxaFUakE9WXF6MKRy23xPQc"  # Replace with your actual ID
         spreadsheet = gs_client.open_by_key(spreadsheet_id)
 
+        st.write(spreadsheet)
+
 
         # Select the first worksheet (or specify by name)
         var_sheet = spreadsheet.worksheet("Meta_AdName_REF")  
