@@ -29,7 +29,7 @@ gs_client = gspread.authorize(credentials)  # Google Sheets
 def load_meta_data():
     query = """
     SELECT *
-    FROM `heliose.heliose_segments.meta_adlevel`
+    FROM `winchoice.winchoice_segments.meta_adlevel`
     """  # Replace with actual table name
     df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
 
@@ -46,7 +46,7 @@ def filter_data(df, start_date, end_date):
 def load_meta_gsheet_data():
     try:
         # Open the Google Sheet
-        spreadsheet_id = "1-bBXJqtKJBqMwuTzuAjP_XwR35lNZQGe3iwr5plGqiU"  # Replace with your actual ID
+        spreadsheet_id = "1GwN8pFB9Gkjuq9MJnHX6LxaFUakE9WXF6MKRy23xPQc"  # Replace with your actual ID
         spreadsheet = gs_client.open_by_key(spreadsheet_id)
 
 
