@@ -88,11 +88,11 @@ def main():
     meta_data = load_meta_data()
     meta_ref_data, meta_camp_data = load_meta_gsheet_data()
 
-    merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
-    merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
+    merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
+    merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
 
-    ### Add Campaign Type filter
-    type_options = ["All"] + sorted(merged_data["Type"].dropna().unique().tolist()) + ["Unmapped"]
+    ### **Add Campaign Type filter**
+    type_options = ["All"] + sorted(merged_data["Type"].dropna().astype(str).unique().tolist()) + ["Unmapped"]
     selected_type = st.selectbox("Select Campaign Type:", type_options, index=0)
 
     if selected_type == "Unmapped":
@@ -100,7 +100,7 @@ def main():
     elif selected_type != "All":
         merged_data = merged_data[merged_data["Type"] == selected_type]
 
-    # Date filters
+    # **Date filters**
     col1, col2 = st.columns(2)
     with col1:
         start_date = st.date_input("Start Date", datetime.today() - timedelta(days=30))
@@ -111,60 +111,55 @@ def main():
         st.error("End date must be after start date.")
         return
 
-    # Apply date filtering
+    # **Apply date filtering**
     filtered_df = filter_data(merged_data, start_date, end_date)
 
-    # List of categorical variables for multi-select filtering
-    categorical_vars = [
+    # **Define categorical variables**
+    all_categorical_vars = [
         "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
         "Primary Imagery Style", "Secondary Imagery Style", "Background Brightness",
         "Copy Style", "Aesthetic", "Concept", "Key Design Element",
         "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"
     ]
 
-    # **Dynamically Generate Multi-Select Filters**
-    st.write("### Filter Data")
-    
-    num_columns = 5  # Number of columns per row
-    num_rows = -(-len(categorical_vars) // num_columns)  # Ceiling division to get rows
-    
-    # Create dynamic rows based on the number of filters
-    rows = [st.columns(num_columns) for _ in range(num_rows)]
-    
-    # Dictionary to store filter selections
-    filter_values = {}
-    
-    for i, var in enumerate(categorical_vars):
-        row_idx = i // num_columns  # Determine which row
-        col_idx = i % num_columns  # Determine which column within the row
-    
-        col = rows[row_idx][col_idx]  # Select appropriate column in the correct row
-    
-        # Get unique values including "All" and "Unmapped"
-        unique_values = ["All"] + sorted(filtered_df[var].dropna().astype(str).unique().tolist()) + ["Unmapped"]
-        filter_values[var] = col.multiselect(f"Filter by {var}", unique_values, default=["All"])
-    
-    # **Apply filters dynamically**
-    for var, selected_values in filter_values.items():
-        if "All" not in selected_values:
-            if "Unmapped" in selected_values:
-                filtered_df = filtered_df[filtered_df[var].isna() | filtered_df[var].isin(selected_values)]
-            else:
-                filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
-
-
-    # **User selects breakdown order**
+    # **User selects breakdown order first**
     st.write("### Select Breakdown Variables")
-    selected_vars = st.multiselect("Breakdown order:", categorical_vars, default=["Hook"])
+    selected_vars = st.multiselect("Breakdown order:", all_categorical_vars, default=["Hook"])
 
     if selected_vars:
+        # **📌 Only show filters for selected variables**
+        st.write("### Filter Data")
+
+        num_columns = 5
+        num_rows = -(-len(selected_vars) // num_columns)  # Ceiling division
+
+        rows = [st.columns(num_columns) for _ in range(num_rows)]
+        filter_values = {}
+
+        for i, var in enumerate(selected_vars):
+            row_idx = i // num_columns
+            col_idx = i % num_columns
+            col = rows[row_idx][col_idx]
+
+            # Get unique values including "All" and "Unmapped"
+            unique_values = ["All"] + sorted(filtered_df[var].dropna().astype(str).unique().tolist()) + ["Unmapped"]
+            filter_values[var] = col.multiselect(f"Filter by {var}", unique_values, default=["All"])
+
+        # **Apply filters dynamically**
+        for var, selected_values in filter_values.items():
+            if "All" not in selected_values:
+                if "Unmapped" in selected_values:
+                    filtered_df = filtered_df[filtered_df[var].isna() | filtered_df[var].isin(selected_values)]
+                else:
+                    filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
+
         # **Group data dynamically based on selection**
         grouped_data = filtered_df.groupby(selected_vars).agg({
             "Clicks": "sum", "Impressions": "sum", "Cost": "sum",
             "3 Sec Views": "sum", "Thruplays": "sum", "Leads": "sum"
         }).reset_index()
 
-        # **Generate calculated columns**
+        # **Generate calculated metrics**
         grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
         grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
         grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
@@ -187,6 +182,8 @@ def main():
 
     else:
         st.write("Please select at least one variable to break down by.")
+
+    st.divider()
 
 if __name__ == "__main__":
     main()
