@@ -122,27 +122,36 @@ def main():
         "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"
     ]
 
-    # **📌 Multi-select filters for categorical variables**
+    # **Dynamically Generate Multi-Select Filters**
     st.write("### Filter Data")
-
-    # **Organize filters in a two-row layout (5 columns per row)**
-    filter_values = {}  # Dictionary to store user selections
-
-    row1 = st.columns(5)
-    row2 = st.columns(5)
-
+    
+    num_columns = 5  # Number of columns per row
+    num_rows = -(-len(categorical_vars) // num_columns)  # Ceiling division to get rows
+    
+    # Create dynamic rows based on the number of filters
+    rows = [st.columns(num_columns) for _ in range(num_rows)]
+    
+    # Dictionary to store filter selections
+    filter_values = {}
+    
     for i, var in enumerate(categorical_vars):
-        col = row1[i] if i < 5 else row2[i - 5]  # Assign filters to correct row/column
+        row_idx = i // num_columns  # Determine which row
+        col_idx = i % num_columns  # Determine which column within the row
+    
+        col = rows[row_idx][col_idx]  # Select appropriate column in the correct row
+    
+        # Get unique values including "All" and "Unmapped"
         unique_values = ["All"] + sorted(filtered_df[var].dropna().unique().tolist()) + ["Unmapped"]
         filter_values[var] = col.multiselect(f"Filter by {var}", unique_values, default=["All"])
-
-    # **Apply filtering based on selected values**
+    
+    # **Apply filters dynamically**
     for var, selected_values in filter_values.items():
         if "All" not in selected_values:
             if "Unmapped" in selected_values:
                 filtered_df = filtered_df[filtered_df[var].isna() | filtered_df[var].isin(selected_values)]
             else:
                 filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
+
 
     # **User selects breakdown order**
     st.write("### Select Breakdown Variables")
