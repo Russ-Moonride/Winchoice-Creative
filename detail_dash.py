@@ -188,7 +188,6 @@ def main():
     st.write("### All Variable Breakdowns")
 
     for var in all_categorical_vars:
-        st.divider()
         st.write(f"#### Breakdown by {var}")
 
         single_var_grouped = filtered_df.groupby(var).agg({
@@ -209,6 +208,7 @@ def main():
         single_var_grouped = single_var_grouped[[var] + metric_order]
 
         st.dataframe(single_var_grouped, use_container_width=True)
+        st.divider()
 
     st.divider()
 
