@@ -160,6 +160,7 @@ def main():
         }).reset_index()
 
         # **Generate calculated metrics**
+        grouped_data["Cost"] = grouped_data["Cost"].apply(format_dollar)
         grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
         grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
         grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
