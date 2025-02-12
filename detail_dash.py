@@ -122,7 +122,7 @@ def main():
     # Display filtered data
     st.write("### Meta Creative Detail Breakdown")
     # List of categorical variables to choose from
-    categorical_vars = ["Ad Name", "Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Copy Style", "Aesthetic", "Concept Description", "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"]
+    categorical_vars = ["Ad Name", "Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Background Brightness", "Copy Style", "Aesthetic", "Concept", "Key Design Element", "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"]
     
     # User selects the breakdown order
     selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Hook"])
