@@ -183,6 +183,7 @@ def main():
     else:
         st.write("Please select at least one variable to break down by.")
 
+    st.divider()
     # **📌 Additional breakdowns for all categorical variables**
     st.write("### All Variable Breakdowns")
 
