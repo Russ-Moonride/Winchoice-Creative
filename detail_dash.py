@@ -141,7 +141,7 @@ def main():
         col = rows[row_idx][col_idx]  # Select appropriate column in the correct row
     
         # Get unique values including "All" and "Unmapped"
-        unique_values = ["All"] + sorted(filtered_df[var].dropna().unique().tolist()) + ["Unmapped"]
+        unique_values = ["All"] + sorted(filtered_df[var].dropna().astype(str).unique().tolist()) + ["Unmapped"]
         filter_values[var] = col.multiselect(f"Filter by {var}", unique_values, default=["All"])
     
     # **Apply filters dynamically**
