@@ -37,6 +37,19 @@ def load_meta_data():
                          "n_3_Second_Video_Views__Facebook_Ads" : "3 Sec Views", "Video_Watches_at_100__Facebook_Ads" : "Thruplays", "Leads__Facebook_Ads" : "Leads"}, inplace=True)
     return df
 
+# Grab CRM data
+@st.cache_data
+def load_hs_data():
+    query = """
+    SELECT *
+    FROM `winchoice.winchoice_segments.hubspot_join_v2`
+    """  # Replace with actual table name
+    df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
+
+    df.rename(columns={"Campaign_Name" : "Campaign Name"})
+    
+    return df
+
 # Function to filter data based on start and end date
 def filter_data(df, start_date, end_date):
     return df[(df["Date"] >= start_date) & (df["Date"] <= end_date)]
@@ -84,13 +97,21 @@ def main():
 
     st.divider()
 
+    hs_data = load_hs_data()
+
     # Load Meta data
     meta_data = load_meta_data()
     meta_ref_data, meta_camp_data = load_meta_gsheet_data()
 
+    # Load Hubspot data
+    hs_data = load_hs_data()
+
     merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
     merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
+    merged_data = pd.merge(merged_data, hs_data, on="Campaign Name", how="left")
 
+    st.write(merged_data)
+    
     ### **Add Campaign Type filter**
     type_options = ["All"] + sorted(merged_data["Type"].dropna().astype(str).unique().tolist()) + ["Unmapped"]
     selected_type = st.selectbox("Select Campaign Type:", type_options, index=0)
