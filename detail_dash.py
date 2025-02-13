@@ -46,7 +46,7 @@ def load_hs_data():
     """  # Replace with actual table name
     df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
 
-    df.rename(column={"Campaign_Name" : "Campaign Name", })
+    df.rename(columns={"Campaign_Name" : "Campaign Name", })
     
     return df
 
