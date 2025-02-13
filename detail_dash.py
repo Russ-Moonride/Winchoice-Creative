@@ -106,11 +106,12 @@ def main():
     # Load Hubspot data
     hs_data = load_hs_data()
 
+    st.write(merged_data)
+    st.write(merged_data.columns)
+
     merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
     merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
-    merged_data = pd.merge(merged_data, hs_data, on="Campaign Name", how="left")
-
-    st.write(merged_data)
+    #merged_data = pd.merge(merged_data, hs_data, on="Campaign Name", how="left")
     
     ### **Add Campaign Type filter**
     type_options = ["All"] + sorted(merged_data["Type"].dropna().astype(str).unique().tolist()) + ["Unmapped"]
