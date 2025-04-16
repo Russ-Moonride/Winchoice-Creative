@@ -125,7 +125,7 @@ def main():
 
     # **User selects breakdown order first**
     st.write("### Select Breakdown Variables")
-    selected_vars = st.multiselect("Breakdown order:", all_categorical_vars, default=["Hook"])
+    selected_vars = st.multiselect("Breakdown order:", all_categorical_vars, default=["Ad Name"])
 
     if selected_vars:
         # **📌 Only show filters for selected variables**
