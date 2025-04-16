@@ -88,6 +88,8 @@ def main():
     meta_data = load_meta_data()
     meta_ref_data, meta_camp_data = load_meta_gsheet_data()
 
+    st.write(meta_ref_data)
+
     merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
     merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
     
