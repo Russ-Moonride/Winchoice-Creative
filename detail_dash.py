@@ -118,9 +118,8 @@ def main():
 
     # **Define all categorical variables**
     all_categorical_vars = [
-        "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
-        "Primary Imagery Style", "Secondary Imagery Style", "Background Brightness",
-        "Copy Style", "Aesthetic", "Concept", "Key Design Element",
+        "Asset", "Asset Name", "Ad Name", "Batch", "Ad Format", "Hook Text", "Supporting Text", "Hook Visuals", "Supporting Visuals", "Concept", "Font Style", "Aesthetic",
+        "Background Brightness", "Creative Theme Variable", "Video Duration",
         "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"
     ]
 
