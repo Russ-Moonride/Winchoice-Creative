@@ -95,7 +95,7 @@ def main():
     merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
     
     ### **Add Campaign Type filter**
-    type_options = ["All"] + sorted(merged_data["Teir"].dropna().astype(str).unique().tolist())
+    type_options = ["All"] + sorted(merged_data["Tier"].dropna().astype(str).unique().tolist())
     selected_type = st.selectbox("Select Campaign Type:", type_options, index=0)
 
     # if selected_type == "Unmapped":
