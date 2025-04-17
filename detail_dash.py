@@ -93,7 +93,6 @@ def main():
 
     merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
     merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
-    st.write(merged_data)
     
     ### **Add Campaign Type filter**
     type_options = ["All"] + sorted(merged_data["Teir"].dropna().astype(str).unique().tolist())
@@ -101,7 +100,7 @@ def main():
 
     # if selected_type == "Unmapped":
     #     merged_data = merged_data[merged_data["Type"].isna()]
-    elif selected_type != "All":
+    if selected_type != "All":
         merged_data = merged_data[merged_data["Type"] == selected_type]
 
     # **Date filters**
