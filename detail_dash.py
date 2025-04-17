@@ -36,7 +36,7 @@ def load_meta_data():
     df.rename(columns={"Ad_Name__Facebook_Ads" : "Ad Name", "Ad_Set_Name__Facebook_Ads" : "Ad Set", "Campaign_Name__Facebook_Ads" : "Campaign Name", "Link_Clicks__Facebook_Ads" : "Clicks", "Impressions__Facebook_Ads" : "Impressions", "Amount_Spent__Facebook_Ads" : "Cost", 
                          "n_3_Second_Video_Views__Facebook_Ads" : "3 Sec Views", "Video_Watches_at_100__Facebook_Ads" : "Thruplays", "Leads__Facebook_Ads" : "Leads"}, inplace=True)
 
-    df['Tier'] = df['Campaign Name'].apply(lambda x: 'T1' if 'T1' in x else 'T2')
+    df['Tier'] = df['Campaign Name'].apply(lambda x: 'T1' if 'T1' in x else 'No Tier')
 
     return df
 
@@ -96,11 +96,11 @@ def main():
     st.write(merged_data)
     
     ### **Add Campaign Type filter**
-    type_options = ["All"] + sorted(merged_data["Type"].dropna().astype(str).unique().tolist()) + ["Unmapped"]
+    type_options = ["All"] + sorted(merged_data["Teir"].dropna().astype(str).unique().tolist())
     selected_type = st.selectbox("Select Campaign Type:", type_options, index=0)
 
-    if selected_type == "Unmapped":
-        merged_data = merged_data[merged_data["Type"].isna()]
+    # if selected_type == "Unmapped":
+    #     merged_data = merged_data[merged_data["Type"].isna()]
     elif selected_type != "All":
         merged_data = merged_data[merged_data["Type"] == selected_type]
 
