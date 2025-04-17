@@ -121,7 +121,7 @@ def main():
     all_categorical_vars = [
         "Campaign Name", "Asset", "Asset Name", "Ad Name", "Batch", "Ad Format", "Hook Text", "Supporting Text", "Hook Visuals", "Supporting Visuals", "Concept", "Font Style", "Aesthetic",
         "Background Brightness", "Creative Theme Variable", "Video Duration",
-        "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"
+        "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message", "Teir"
     ]
 
     # **User selects breakdown order first**
