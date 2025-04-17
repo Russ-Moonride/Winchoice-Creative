@@ -101,7 +101,7 @@ def main():
     # if selected_type == "Unmapped":
     #     merged_data = merged_data[merged_data["Type"].isna()]
     if selected_type != "All":
-        merged_data = merged_data[merged_data["Type"] == selected_type]
+        merged_data = merged_data[merged_data["Tier"] == selected_type]
 
     # **Date filters**
     col1, col2 = st.columns(2)
