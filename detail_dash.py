@@ -158,12 +158,20 @@ def main():
         ]
 
         st.write("### Select Metrics to Display")
-        selected_metrics = st.multiselect(
-            "Metrics shown in breakdown tables:",
-            options=all_metrics,
-            default=all_metrics,
-            key="metric_selector"
-        )
+
+        # Checkbox to control "Select All"
+        select_all = st.checkbox("Select all metrics", value=True)
+
+        if select_all:
+            selected_metrics = all_metrics
+        else:
+            selected_metrics = st.multiselect(
+                "Choose metrics to display:",
+                options=all_metrics,
+                default=all_metrics[:5],  # Optional: prefill some common metrics
+                key="metric_selector"
+            )
+
 
         # Group data
         grouped_data = filtered_df.groupby(selected_vars).agg({
