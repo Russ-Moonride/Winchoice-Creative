@@ -120,7 +120,7 @@ def main():
         "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message", "Tier"
     ]
 
-    # Display Breakdown and Metrics side by side
+    # Select breakdown and metrics side by side
     breakdown_col, metric_col = st.columns(2)
 
     with breakdown_col:
@@ -144,12 +144,10 @@ def main():
         final_metrics = all_metrics if "All" in selected_metrics else selected_metrics
 
     if selected_vars:
-        # Show filters for selected variables
         st.write("### Filter Data")
 
         num_columns = 5
         num_rows = -(-len(selected_vars) // num_columns)
-
         rows = [st.columns(num_columns) for _ in range(num_rows)]
         filter_values = {}
 
@@ -158,8 +156,16 @@ def main():
             col_idx = i % num_columns
             col = rows[row_idx][col_idx]
 
-            unique_values = ["All"] + sorted(filtered_df[var].dropna().astype(str).unique().tolist()) + ["Unmapped"]
-            filter_values[var] = col.multiselect(f"Filter by {var}", unique_values, default=["All"])
+            contains_filter = col.text_input(f"Search {var}", value="", key=f"contains_{var}").strip().lower()
+
+            full_unique_vals = filtered_df[var].dropna().astype(str).unique().tolist()
+            if contains_filter:
+                filtered_vals = [val for val in full_unique_vals if contains_filter in val.lower()]
+            else:
+                filtered_vals = full_unique_vals
+
+            dropdown_vals = ["All"] + sorted(filtered_vals) + ["Unmapped"]
+            filter_values[var] = col.multiselect(f"Filter by {var}", dropdown_vals, default=["All"], key=f"dropdown_{var}")
 
         for var, selected_values in filter_values.items():
             if "All" not in selected_values:
@@ -184,7 +190,6 @@ def main():
 
         grouped_data = grouped_data[selected_vars + final_metrics]
 
-        # Display main table
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data, use_container_width=True)
 
@@ -218,8 +223,6 @@ def main():
         st.divider()
 
     st.divider()
-
-
 
 if __name__ == "__main__":
     main()
