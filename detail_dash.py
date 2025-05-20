@@ -81,7 +81,6 @@ def format_dollar(value):
     return f"${value:,.2f}"  # Converts 1234.56 to '$1,234.56'
 
 
-# Streamlit app
 def main():
     st.title("Winchoice Creative Report")
 
@@ -94,16 +93,14 @@ def main():
     merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
     merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
     
-    ### **Add Campaign Type filter**
+    # Campaign Type filter
     type_options = ["All"] + sorted(merged_data["Tier"].dropna().astype(str).unique().tolist())
     selected_type = st.selectbox("Select Campaign Type:", type_options, index=0)
 
-    # if selected_type == "Unmapped":
-    #     merged_data = merged_data[merged_data["Type"].isna()]
     if selected_type != "All":
         merged_data = merged_data[merged_data["Tier"] == selected_type]
 
-    # **Date filters**
+    # Date filters
     col1, col2 = st.columns(2)
     with col1:
         start_date = st.date_input("Start Date", datetime.today() - timedelta(days=30))
@@ -114,26 +111,26 @@ def main():
         st.error("End date must be after start date.")
         return
 
-    # **Apply date filtering**
+    # Apply date filtering
     filtered_df = filter_data(merged_data, start_date, end_date)
 
-    # **Define all categorical variables**
+    # Categorical variables
     all_categorical_vars = [
         "Campaign Name", "Asset", "Asset Name", "Ad Name", "Batch", "Ad Format", "Hook Text", "Supporting Text", "Hook Visuals", "Supporting Visuals", "Concept", "Font Style", "Aesthetic",
         "Background Brightness", "Creative Theme Variable", "Video Duration",
-        "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message", "Tier"
+        "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message", "Tier"
     ]
 
-    # **User selects breakdown order first**
+    # Breakdown variable selection
     st.write("### Select Breakdown Variables")
     selected_vars = st.multiselect("Breakdown order:", all_categorical_vars, default=["Ad Name"])
 
     if selected_vars:
-        # **📌 Only show filters for selected variables**
+        # Show filters for selected variables
         st.write("### Filter Data")
 
         num_columns = 5
-        num_rows = -(-len(selected_vars) // num_columns)  # Ceiling division
+        num_rows = -(-len(selected_vars) // num_columns)
 
         rows = [st.columns(num_columns) for _ in range(num_rows)]
         filter_values = {}
@@ -143,11 +140,9 @@ def main():
             col_idx = i % num_columns
             col = rows[row_idx][col_idx]
 
-            # Get unique values including "All" and "Unmapped"
             unique_values = ["All"] + sorted(filtered_df[var].dropna().astype(str).unique().tolist()) + ["Unmapped"]
             filter_values[var] = col.multiselect(f"Filter by {var}", unique_values, default=["All"])
 
-        # **Apply filters dynamically**
         for var, selected_values in filter_values.items():
             if "All" not in selected_values:
                 if "Unmapped" in selected_values:
@@ -155,13 +150,27 @@ def main():
                 else:
                     filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
 
-        # **Group data dynamically based on selection**
+        # Metric selection
+        all_metrics = [
+            "Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
+            "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
+            "Leads", "CPL", "CVR (Click)"
+        ]
+
+        st.write("### Select Metrics to Display")
+        selected_metrics = st.multiselect(
+            "Metrics shown in breakdown tables:",
+            options=all_metrics,
+            default=all_metrics,
+            key="metric_selector"
+        )
+
+        # Group data
         grouped_data = filtered_df.groupby(selected_vars).agg({
             "Clicks": "sum", "Impressions": "sum", "Cost": "sum",
             "3 Sec Views": "sum", "Thruplays": "sum", "Leads": "sum"
         }).reset_index()
 
-        # **Generate calculated metrics**
         grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
         grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
         grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
@@ -170,15 +179,9 @@ def main():
         grouped_data["CPL"] = (grouped_data["Cost"] / grouped_data["Leads"]).apply(format_dollar)
         grouped_data["CVR (Click)"] = (grouped_data["Leads"] / grouped_data["Clicks"]).apply(format_percentage)
 
-        # **Define column order**
-        metric_order = [
-            "Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
-            "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
-            "Leads", "CPL", "CVR (Click)"
-        ]
-        grouped_data = grouped_data[selected_vars + metric_order]
+        grouped_data = grouped_data[selected_vars + selected_metrics]
 
-        # **Display main results**
+        # Display main table
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data, use_container_width=True)
 
@@ -186,7 +189,8 @@ def main():
         st.write("Please select at least one variable to break down by.")
 
     st.divider()
-    # **📌 Additional breakdowns for all categorical variables**
+
+    # Additional breakdowns
     st.write("### All Variable Breakdowns")
 
     for var in all_categorical_vars:
@@ -197,7 +201,6 @@ def main():
             "3 Sec Views": "sum", "Thruplays": "sum", "Leads": "sum"
         }).reset_index()
 
-        # Generate calculated columns
         single_var_grouped["CTR"] = (single_var_grouped["Clicks"] / single_var_grouped["Impressions"]).apply(format_percentage)
         single_var_grouped["CPC"] = (single_var_grouped["Cost"] / single_var_grouped["Clicks"]).apply(format_dollar)
         single_var_grouped["CPM"] = ((single_var_grouped["Cost"] / single_var_grouped["Impressions"]) * 1000).apply(format_dollar)
@@ -206,8 +209,7 @@ def main():
         single_var_grouped["CPL"] = (single_var_grouped["Cost"] / single_var_grouped["Leads"]).apply(format_dollar)
         single_var_grouped["CVR (Click)"] = (single_var_grouped["Leads"] / single_var_grouped["Clicks"]).apply(format_percentage)
 
-        # Organize column order
-        single_var_grouped = single_var_grouped[[var] + metric_order]
+        single_var_grouped = single_var_grouped[[var] + selected_metrics]
 
         st.dataframe(single_var_grouped, use_container_width=True)
         st.divider()
