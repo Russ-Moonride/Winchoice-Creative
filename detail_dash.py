@@ -80,7 +80,6 @@ def format_dollar(value):
         return "N/A"
     return f"${value:,.2f}"  # Converts 1234.56 to '$1,234.56'
 
-
 def main():
     st.title("Winchoice Creative Report")
 
@@ -121,9 +120,28 @@ def main():
         "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message", "Tier"
     ]
 
-    # Breakdown variable selection
-    st.write("### Select Breakdown Variables")
-    selected_vars = st.multiselect("Breakdown order:", all_categorical_vars, default=["Ad Name"])
+    # Display Breakdown and Metrics side by side
+    breakdown_col, metric_col = st.columns(2)
+
+    with breakdown_col:
+        st.write("### Select Breakdown Variables")
+        selected_vars = st.multiselect("Breakdown order:", all_categorical_vars, default=["Ad Name"])
+
+    with metric_col:
+        all_metrics = [
+            "Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
+            "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
+            "Leads", "CPL", "CVR (Click)"
+        ]
+        metric_options = ["All"] + all_metrics
+        st.write("### Select Metrics to Display")
+        selected_metrics = st.multiselect(
+            "Choose metrics to display:",
+            options=metric_options,
+            default=["All"],
+            key="metric_selector"
+        )
+        final_metrics = all_metrics if "All" in selected_metrics else selected_metrics
 
     if selected_vars:
         # Show filters for selected variables
@@ -149,26 +167,6 @@ def main():
                     filtered_df = filtered_df[filtered_df[var].isna() | filtered_df[var].isin(selected_values)]
                 else:
                     filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
-
-        # Metric selection with "All" logic
-        all_metrics = [
-            "Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
-            "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
-            "Leads", "CPL", "CVR (Click)"
-        ]
-
-        metric_options = ["All"] + all_metrics
-        selected_metrics = st.multiselect(
-            "Choose metrics to display:",
-            options=metric_options,
-            default=["All"],
-            key="metric_selector"
-        )
-
-        if "All" in selected_metrics:
-            final_metrics = all_metrics
-        else:
-            final_metrics = selected_metrics
 
         # Group data
         grouped_data = filtered_df.groupby(selected_vars).agg({
@@ -220,6 +218,7 @@ def main():
         st.divider()
 
     st.divider()
+
 
 
 if __name__ == "__main__":
