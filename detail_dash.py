@@ -150,28 +150,25 @@ def main():
                 else:
                     filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
 
-        # Metric selection
+        # Metric selection with "All" logic
         all_metrics = [
             "Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
             "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
             "Leads", "CPL", "CVR (Click)"
         ]
 
-        st.write("### Select Metrics to Display")
+        metric_options = ["All"] + all_metrics
+        selected_metrics = st.multiselect(
+            "Choose metrics to display:",
+            options=metric_options,
+            default=["All"],
+            key="metric_selector"
+        )
 
-        # Checkbox to control "Select All"
-        select_all = st.checkbox("Select all metrics", value=True)
-
-        if select_all:
-            selected_metrics = all_metrics
+        if "All" in selected_metrics:
+            final_metrics = all_metrics
         else:
-            selected_metrics = st.multiselect(
-                "Choose metrics to display:",
-                options=all_metrics,
-                default=all_metrics[:5],  # Optional: prefill some common metrics
-                key="metric_selector"
-            )
-
+            final_metrics = selected_metrics
 
         # Group data
         grouped_data = filtered_df.groupby(selected_vars).agg({
@@ -187,7 +184,7 @@ def main():
         grouped_data["CPL"] = (grouped_data["Cost"] / grouped_data["Leads"]).apply(format_dollar)
         grouped_data["CVR (Click)"] = (grouped_data["Leads"] / grouped_data["Clicks"]).apply(format_percentage)
 
-        grouped_data = grouped_data[selected_vars + selected_metrics]
+        grouped_data = grouped_data[selected_vars + final_metrics]
 
         # Display main table
         st.write("### Breakdown by Selected Variables")
@@ -217,12 +214,13 @@ def main():
         single_var_grouped["CPL"] = (single_var_grouped["Cost"] / single_var_grouped["Leads"]).apply(format_dollar)
         single_var_grouped["CVR (Click)"] = (single_var_grouped["Leads"] / single_var_grouped["Clicks"]).apply(format_percentage)
 
-        single_var_grouped = single_var_grouped[[var] + selected_metrics]
+        single_var_grouped = single_var_grouped[[var] + final_metrics]
 
         st.dataframe(single_var_grouped, use_container_width=True)
         st.divider()
 
     st.divider()
+
 
 if __name__ == "__main__":
     main()
