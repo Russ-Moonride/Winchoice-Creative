@@ -158,14 +158,17 @@ def main():
 
             contains_filter = col.text_input(f"Search {var}", value="", key=f"contains_{var}").strip().lower()
 
-            full_unique_vals = filtered_df[var].dropna().astype(str).unique().tolist()
+            # Apply contains filter directly to the data
             if contains_filter:
-                filtered_vals = [val for val in full_unique_vals if contains_filter in val.lower()]
-            else:
-                filtered_vals = full_unique_vals
+                filtered_df = filtered_df[
+                    filtered_df[var].astype(str).str.lower().str.contains(contains_filter)
+                ]
 
-            dropdown_vals = ["All"] + sorted(filtered_vals) + ["Unmapped"]
+            # After contains filter, build dropdown values from what's left
+            dropdown_options = filtered_df[var].dropna().astype(str).unique().tolist()
+            dropdown_vals = ["All"] + sorted(dropdown_options) + ["Unmapped"]
             filter_values[var] = col.multiselect(f"Filter by {var}", dropdown_vals, default=["All"], key=f"dropdown_{var}")
+
 
         for var, selected_values in filter_values.items():
             if "All" not in selected_values:
