@@ -3,6 +3,7 @@ import pandas as pd
 from google.cloud import bigquery
 from datetime import datetime, timedelta
 from google.oauth2 import service_account
+import plotly.express as px
 import gspread
 
 st.set_page_config(page_title="Winchoice Creative Report", layout="wide", page_icon="🔬")
