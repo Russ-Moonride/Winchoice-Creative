@@ -185,7 +185,7 @@ def show_ad_insights_section(filtered_df):
         y=selected_metric,
         color="Group",
         barmode="group",
-        title=f"{selected_metric} by {selected_dimension} (Grouped by A/B)"
+        title=f"{selected_metric} by {selected_dimension}"
     )
     fig.update_layout(xaxis_title=selected_dimension, yaxis_title=selected_metric)
     st.plotly_chart(fig, use_container_width=True)
