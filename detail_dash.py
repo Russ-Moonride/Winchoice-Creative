@@ -80,6 +80,48 @@ def format_dollar(value):
         return "N/A"
     return f"${value:,.2f}"  # Converts 1234.56 to '$1,234.56'
 
+
+def show_ad_insights_section(filtered_df):
+    st.subheader("📊 Ad-Level Insights Explorer")
+
+    ad_list = sorted(filtered_df["Ad Name"].dropna().unique().tolist())
+    selected_ads = st.multiselect("Select Ads to Include", ad_list)
+
+    if not selected_ads:
+        st.info("Select one or more ads to display insights.")
+        return
+
+    # Filter data to selected ads
+    ad_data = filtered_df[filtered_df["Ad Name"].isin(selected_ads)]
+
+    # Metric and dimension selection
+    numeric_cols = [
+        "Impressions", "Clicks", "Cost", "3 Sec Views", "Thruplays", "Leads",
+        "CTR", "CPC", "CPM", "3 Sec View Rate", "Vid Complete Rate", "CPL", "CVR (Click)"
+    ]
+    dimension_cols = [
+        "Ad Name", "Campaign Name", "Asset Name", "Batch", "Ad Format", "Concept"
+    ]
+
+    col1, col2 = st.columns(2)
+    with col1:
+        selected_metric = st.selectbox("Metric to Display", numeric_cols)
+    with col2:
+        selected_dimension = st.selectbox("Group By Dimension", dimension_cols)
+
+    if selected_metric not in ad_data.columns or selected_dimension not in ad_data.columns:
+        st.warning("Selected metric or dimension not found in data.")
+        return
+
+    # Clean data for chart
+    chart_df = ad_data.groupby(selected_dimension)[selected_metric].sum().reset_index()
+
+    # Plot
+    fig = px.bar(chart_df, x=selected_dimension, y=selected_metric, title=f"{selected_metric} by {selected_dimension}")
+    fig.update_layout(xaxis_title=selected_dimension, yaxis_title=selected_metric)
+    st.plotly_chart(fig, use_container_width=True)
+
+
 def main():
     st.title("Winchoice Creative Report")
 
@@ -195,6 +237,9 @@ def main():
 
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data, use_container_width=True)
+
+    st.divider()
+    show_ad_insights_section(filtered_df)
 
     else:
         st.write("Please select at least one variable to break down by.")
