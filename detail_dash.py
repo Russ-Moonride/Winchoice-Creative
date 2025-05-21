@@ -132,6 +132,15 @@ def show_ad_insights_section(filtered_df):
         df_b = filtered_df[filtered_df["Ad Name"].isin(selected_compare_ads)].copy()
         df_b["Group"] = "Group B"
         plot_df = pd.concat([df_a, df_b])
+        # Recalculate derived metrics in plot_df
+        plot_df["CTR"] = plot_df["Clicks"] / plot_df["Impressions"]
+        plot_df["CPC"] = plot_df["Cost"] / plot_df["Clicks"]
+        plot_df["CPM"] = (plot_df["Cost"] / plot_df["Impressions"]) * 1000
+        plot_df["3 Sec View Rate"] = plot_df["3 Sec Views"] / plot_df["Impressions"]
+        plot_df["Vid Complete Rate"] = plot_df["Thruplays"] / plot_df["Impressions"]
+        plot_df["CPL"] = plot_df["Cost"] / plot_df["Leads"]
+        plot_df["CVR (Click)"] = plot_df["Leads"] / plot_df["Clicks"]
+
     else:
         plot_df = df_a
 
