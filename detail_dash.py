@@ -90,10 +90,10 @@ def show_ad_insights_section(filtered_df):
     col1, col2 = st.columns(2)
 
     with col1:
-        primary_search = st.text_input("Search Ad Names (Group A)", "")
+        primary_search = st.text_input("Search Ad Names", "")
         all_ads = sorted(filtered_df["Ad Name"].dropna().astype(str).unique())
         filtered_ads = [ad for ad in all_ads if primary_search.lower() in ad.lower()]
-        selected_ads = st.multiselect("Select Ads (Group A)", options=filtered_ads, default=filtered_ads[:5])
+        selected_ads = st.multiselect("Select Ads", options=filtered_ads, default=filtered_ads[:5])
 
     with col2:
         compare_enabled = st.checkbox("Enable Comparison Group (Group B)")
@@ -123,14 +123,14 @@ def show_ad_insights_section(filtered_df):
     with col4:
         selected_dimension = st.selectbox("Group By Dimension", dimension_cols)
 
-    # Build group A dataframe
+    # Build current dataframe
     df_a = filtered_df[filtered_df["Ad Name"].isin(selected_ads)].copy()
-    df_a["Group"] = "Group A"
+    df_a["Group"] = "Current"
 
     # Build group B dataframe (if enabled)
     if selected_compare_ads:
         df_b = filtered_df[filtered_df["Ad Name"].isin(selected_compare_ads)].copy()
-        df_b["Group"] = "Group B"
+        df_b["Group"] = "Legacy"
         plot_df = pd.concat([df_a, df_b])
         # Recalculate derived metrics in plot_df
         plot_df["CTR"] = plot_df["Clicks"] / plot_df["Impressions"]
