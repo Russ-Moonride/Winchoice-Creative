@@ -143,6 +143,13 @@ def show_ad_insights_section(filtered_df):
 
     else:
         plot_df = df_a
+        plot_df["CTR"] = plot_df["Clicks"] / plot_df["Impressions"]
+        plot_df["CPC"] = plot_df["Cost"] / plot_df["Clicks"]
+        plot_df["CPM"] = (plot_df["Cost"] / plot_df["Impressions"]) * 1000
+        plot_df["3 Sec View Rate"] = plot_df["3 Sec Views"] / plot_df["Impressions"]
+        plot_df["Vid Complete Rate"] = plot_df["Thruplays"] / plot_df["Impressions"]
+        plot_df["CPL"] = plot_df["Cost"] / plot_df["Leads"]
+        plot_df["CVR (Click)"] = plot_df["Leads"] / plot_df["Clicks"]
 
     # Handle missing columns
     if selected_metric not in plot_df.columns or selected_dimension not in plot_df.columns:
