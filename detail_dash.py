@@ -85,15 +85,28 @@ def format_dollar(value):
 def show_ad_insights_section(filtered_df):
     st.subheader("📊 Ad-Level Insights Explorer")
 
-    ad_list = sorted(filtered_df["Ad Name"].dropna().unique().tolist())
-    selected_ads = st.multiselect("Select Ads to Include", ad_list)
+    st.markdown("Use the filters below to select a group of ads and an optional comparison group.")
 
-    if not selected_ads:
-        st.info("Select one or more ads to display insights.")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        primary_search = st.text_input("Search Ad Names (Group A)", "")
+        all_ads = sorted(filtered_df["Ad Name"].dropna().astype(str).unique())
+        filtered_ads = [ad for ad in all_ads if primary_search.lower() in ad.lower()]
+        selected_ads = st.multiselect("Select Ads (Group A)", options=filtered_ads, default=filtered_ads[:5])
+
+    with col2:
+        compare_enabled = st.checkbox("Enable Comparison Group (Group B)")
+        if compare_enabled:
+            compare_search = st.text_input("Search Ad Names (Group B)", "")
+            compare_ads = [ad for ad in all_ads if compare_search.lower() in ad.lower()]
+            selected_compare_ads = st.multiselect("Select Ads (Group B)", options=compare_ads, default=compare_ads[:5])
+        else:
+            selected_compare_ads = []
+
+    if not selected_ads and not selected_compare_ads:
+        st.info("Select at least one ad to display insights.")
         return
-
-    # Filter data to selected ads
-    ad_data = filtered_df[filtered_df["Ad Name"].isin(selected_ads)]
 
     # Metric and dimension selection
     numeric_cols = [
@@ -104,21 +117,46 @@ def show_ad_insights_section(filtered_df):
         "Ad Name", "Campaign Name", "Asset Name", "Batch", "Ad Format", "Concept"
     ]
 
-    col1, col2 = st.columns(2)
-    with col1:
+    col3, col4 = st.columns(2)
+    with col3:
         selected_metric = st.selectbox("Metric to Display", numeric_cols)
-    with col2:
+    with col4:
         selected_dimension = st.selectbox("Group By Dimension", dimension_cols)
 
-    if selected_metric not in ad_data.columns or selected_dimension not in ad_data.columns:
+    # Build group A dataframe
+    df_a = filtered_df[filtered_df["Ad Name"].isin(selected_ads)].copy()
+    df_a["Group"] = "Group A"
+
+    # Build group B dataframe (if enabled)
+    if selected_compare_ads:
+        df_b = filtered_df[filtered_df["Ad Name"].isin(selected_compare_ads)].copy()
+        df_b["Group"] = "Group B"
+        plot_df = pd.concat([df_a, df_b])
+    else:
+        plot_df = df_a
+
+    # Handle missing columns
+    if selected_metric not in plot_df.columns or selected_dimension not in plot_df.columns:
         st.warning("Selected metric or dimension not found in data.")
         return
 
-    # Clean data for chart
-    chart_df = ad_data.groupby(selected_dimension)[selected_metric].sum().reset_index()
+    # Group by dimension and group
+    chart_df = (
+        plot_df
+        .groupby([selected_dimension, "Group"])[selected_metric]
+        .sum()
+        .reset_index()
+    )
 
     # Plot
-    fig = px.bar(chart_df, x=selected_dimension, y=selected_metric, title=f"{selected_metric} by {selected_dimension}")
+    fig = px.bar(
+        chart_df,
+        x=selected_dimension,
+        y=selected_metric,
+        color="Group",
+        barmode="group",
+        title=f"{selected_metric} by {selected_dimension} (Grouped by A/B)"
+    )
     fig.update_layout(xaxis_title=selected_dimension, yaxis_title=selected_metric)
     st.plotly_chart(fig, use_container_width=True)
 
