@@ -150,12 +150,26 @@ def show_ad_insights_section(filtered_df):
         return
 
     # Group by dimension and group
-    chart_df = (
-        plot_df
-        .groupby([selected_dimension, "Group"])[selected_metric]
+    agg_df = (
+        plot_df.groupby([selected_dimension, "Group"])[
+            ["Clicks", "Impressions", "Cost", "3 Sec Views", "Thruplays", "Leads"]
+        ]
         .sum()
         .reset_index()
     )
+    
+    # Recalculate derived metrics post-aggregation
+    agg_df["CTR"] = agg_df["Clicks"] / agg_df["Impressions"]
+    agg_df["CPC"] = agg_df["Cost"] / agg_df["Clicks"]
+    agg_df["CPM"] = (agg_df["Cost"] / agg_df["Impressions"]) * 1000
+    agg_df["3 Sec View Rate"] = agg_df["3 Sec Views"] / agg_df["Impressions"]
+    agg_df["Vid Complete Rate"] = agg_df["Thruplays"] / agg_df["Impressions"]
+    agg_df["CPL"] = agg_df["Cost"] / agg_df["Leads"]
+    agg_df["CVR (Click)"] = agg_df["Leads"] / agg_df["Clicks"]
+    
+    # Final chart data
+    chart_df = agg_df[[selected_dimension, "Group", selected_metric]]
+
 
     # Plot
     fig = px.bar(
