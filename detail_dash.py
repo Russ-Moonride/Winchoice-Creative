@@ -238,14 +238,14 @@ def main():
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data, use_container_width=True)
 
-    st.divider()
-    show_ad_insights_section(filtered_df)
-
     else:
         st.write("Please select at least one variable to break down by.")
 
     st.divider()
 
+    show_ad_insights_section(filtered_df)
+    st.divider()
+    
     # Additional breakdowns
     st.write("### All Variable Breakdowns")
 
